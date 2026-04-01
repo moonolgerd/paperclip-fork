@@ -46,7 +46,10 @@ export type MigrationState =
     };
 
 export function createDb(url: string) {
-  const sql = postgres(url);
+  // Supabase transaction pooler (port 6543) requires prepare:false
+  const parsed = new URL(url);
+  const prepare = parsed.port === "6543" ? false : undefined;
+  const sql = postgres(url, prepare !== undefined ? { prepare } : {});
   return drizzlePg(sql, { schema });
 }
 
